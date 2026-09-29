@@ -1,5 +1,5 @@
-//this is for exporting all the auth related components and hooks, so that we can import them easily in other parts of the app
-
-export { default as loginForm } from "./components/loginForm";
-export { default as useLogin } from "./hooks/useLogin";
-export { default as authService } from "./services/authService";
+export { LoginForm }    from "./components/LoginForm";
+export { RegisterForm } from "./components/RegisterForm";
+export { useLogin }     from "./hooks/useLogin";
+export { useRegister }  from "./hooks/useRegister";
+export { authService, ACCESS_TOKEN_NAME } from "./services/authService";

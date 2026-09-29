@@ -1,47 +1,51 @@
-//this is where the app connect to the dtabase and handle the login logic
+// src/features/auth/hooks/useLogin.js
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../../services/authService";
+import { authService } from "../services/authService";
 
 export function useLogin() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword]     = useState("");
+  const [showPass, setShowPass]     = useState(false);
+  const [remember, setRemember]     = useState(false);
+  const [loading, setLoading]       = useState(false);
+  const [toast, setToast]           = useState(null);
+  const navigate                    = useNavigate();
 
-
-  const handleSubmitClick = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-        if (!identifier || !password) {
-            setToast({ type: "error", msg: "Please fill in all fields." });
-            return;
-        }
 
-        setLoading(true);
-        setToast(null);
+    if (!identifier || !password) {
+      setToast({ type: "error", msg: "Please fill in all fields." });
+      return;
+    }
 
-        try {
-            await authService.login({ identifier, password });
-            setToast({ type: "success", msg: "Logged in successfully! Redirecting…" });
-        } catch (err) {
-            setToast({ type: "error", msg: err.message || "Login failed. Please try again." });
-        } finally {
-            setLoading(false);
-        }
-    };
+    setLoading(true);
+    setToast(null);
 
-    return {
-        identifier, setIdentifier,
-        password, setPassword,
-        showPass, setShowPass,
-        remember, setRemember,
-        loading,
-        toast,
-        handleSubmit,
-    };
+    try {
+      const { user } = await authService.login({ identifier, password });
+
+      // Store user info so dashboard can read role and name
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setToast({ type: "success", msg: "Logged in successfully! Redirecting..." });
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      setToast({ type: "error", msg: err.message || "Login failed. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    identifier, setIdentifier,
+    password, setPassword,
+    showPass, setShowPass,
+    remember, setRemember,
+    loading,
+    toast,
+    handleSubmit,
+  };
 }
-
-

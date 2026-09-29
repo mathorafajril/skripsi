@@ -1,14 +1,14 @@
 // src/features/auth/services/authService.js
-
 import axios from "axios";
 
+console.log("API URL:", process.env.REACT_APP_API_BASE_URL);
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 // Centralised config — base URL and headers are set once here, not scattered
 // across every call. The Authorization header is injected automatically via the
 // request interceptor below, so individual callers never touch tokens directly.
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // set in your .env file
+  baseURL: process.env.REACT_APP_API_BASE_URL, // set in your .env file
   timeout: 10000,                              // fail fast after 10 s
   headers: {
     "Content-Type": "application/json",
@@ -112,6 +112,28 @@ export const authService = {
     } finally {
       // Runs whether the call succeeded or failed.
       // Good place to clear any sensitive in-memory state if needed.
+    }
+  },
+
+    /**
+   * Registers a new user.
+   * Password is sent raw over HTTPS — hashing is done server-side only.
+   * Role is NOT sent — the server always assigns 'student' by default.
+   * Temp token is NOT generated at registration — only issued on login.
+   */
+  register: async ({ name, identifier, password }) => {
+    try {
+      const payload = {
+        name:       name.trim(),
+        identifier: identifier.trim(),
+        password,   // never hashed client-side
+        // role is intentionally omitted — server enforces 'student' as default
+      };
+
+      const response = await apiClient.post("/user/register", payload);
+      return response.data;
+    } catch (error) {
+      throw error;
     }
   },
 

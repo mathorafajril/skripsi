@@ -1,20 +1,28 @@
-# Use an official Node.js runtime as the base image
-FROM node:18-alpine
+# Dockerfile.frontend
 
-# Set the working directory inside the container
+FROM node:20-alpine
+
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json (if available)
+# Copy package files first
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application source code
+# Copy source code
 COPY . .
 
-# Expose the port your app runs on (change 3000 to your app’s port)
+# Accept build argument for API URL
+ARG REACT_APP_API_BASE_URL
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
+# Build the React app with the env variable baked in
+RUN npm run build
+
+# Install serve to host the built app
+RUN npm install -g serve
+
 EXPOSE 3000
 
-# Define the command to run your app
-CMD ["npm", "start"]
+CMD ["serve", "-s", "build", "-l", "3000"]
